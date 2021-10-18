@@ -3,6 +3,7 @@ import { Form, Button, Card, Alert } from "react-bootstrap"
 import { useAuth } from "../contexts/AuthContext"
 import { Link, useHistory } from "react-router-dom"
 import { Container } from "react-bootstrap"
+import API from "../util/API"
 
 export default function Signup() {
   const emailRef = useRef()
@@ -24,6 +25,7 @@ export default function Signup() {
       setError("")
       setLoading(true)
       await signup(emailRef.current.value, passwordRef.current.value)
+      await API.createUser(emailRef.current.value)
       history.push("/")
     } catch {
       setError("Failed to create an account")
@@ -33,9 +35,9 @@ export default function Signup() {
   }
 
   return (
-    <Container style={{ display:'flex', justifyContent:'center'  }}>
+    <Container style={{ display: 'flex', justifyContent: 'center' }}>
       <Card>
-           <Card.Body>
+        <Card.Body>
           <h2 className="text-center mb-4">Sign Up</h2>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
@@ -56,9 +58,9 @@ export default function Signup() {
             </Button>
           </Form>
         </Card.Body>
-      <div className="w-100 text-center mt-2">
-        Already have an account? <Link to="/login">Log In</Link>
-      </div>
+        <div className="w-100 text-center mt-2">
+          Already have an account? <Link to="/login">Log In</Link>
+        </div>
       </Card>
     </Container>
   )

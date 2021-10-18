@@ -11,19 +11,11 @@ const userSchema = new Schema({
         trim: true,
         match: [/.+@.+\..+/, "Please enter a valid email address"]
     },
-    username: {
-        type: String,
-        required: "Username is required",
-        unique: true,
-        trim: true
-    },
-    password: {
-        type: String,
-        required: "Password is required",
-        unique: true,
-        trim: true
-    },
     userPosts: [{
+        type: Schema.Types.ObjectId,
+        ref: "Post"
+    }],
+    userFavorites: [{
         type: Schema.Types.ObjectId,
         ref: "Post"
     }]

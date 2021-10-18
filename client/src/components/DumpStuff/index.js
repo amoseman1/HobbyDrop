@@ -10,10 +10,9 @@ import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import FavoriteIcon from '@material-ui/icons/Favorite';
-
-
 import './styles.css'
 import Postcard from '../Postcard'
+
 
 const useStyles = makeStyles((theme) => ({
 
@@ -22,10 +21,13 @@ const useStyles = makeStyles((theme) => ({
 export default function OutlinedCard() {
   const classes = useStyles();
   const { currentUser } = useAuth();
+  console.log(currentUser)
 
   const [posts, setPosts] = useState([])
   const [filter, setFilter] = useState(false)
   const [filterPost, setFilterPost] = useState([])
+  //the new state for filtered favs array
+  const [filterFavs, setFilterFavs] = useState([])
 
   useEffect(() => {
     loadPosts();
@@ -34,22 +36,35 @@ export default function OutlinedCard() {
   function loadPosts() {
     API.getPosts()
       .then(res => {
-        console.log(res.data)
+        ///console.log(res.data)
         setPosts(res.data)
-        setFilterPost(res.data.filter(post => post.id === currentUser.id))
+        setFilterPost(res.data.filter(post => post.id === currentUser.uid))
+        //changes here
+        setFilterFavs(res.data.filter(post => post.id === post.uid))
 
       })
       .catch(err => console.log(err))
   };
 
   const handleFilter = async () => {
-    setFilter(!filter)
+    //changes here
+    setFilter(!filter) || setFilterFavs(!filter)
   }
 
   function deletePost(id) {
     API.deletePost(id)
       .then(res => loadPosts())
       .catch(err => console.log(err))
+  }
+
+  //changes here
+  function favoritesPush(postId) {
+    console.log(currentUser)
+    API.favPush(postId, currentUser._id)
+      .then(res => console.log(res))
+      //loadPosts())
+      .catch(err => console.log(err))
+
   }
 
   return (
@@ -61,25 +76,30 @@ export default function OutlinedCard() {
           <Link to={`postform/${currentUser && currentUser.uid}`}><Button>Make a Post</Button></Link>
 
           <Button onClick={handleFilter}>My Posts</Button>
-          <Button>My Favorites</Button>
+          {/* onclick that calls a function to filter a new favorites state */}
+          <Button onClick={handleFilter}>My Favorites</Button>
         </ButtonGroup>
 
       </Grid>
-      {!filter ?
+      {/* changes here with !favorites */}
+      {!filter && !filterFavs ?
         posts.map(post => {
           return (
             <Postcard
+              key={post.id}
               post={post}
             >
-              <Link>
-                <FavoriteIcon to="Favorites" >Favorite</FavoriteIcon>
-              </Link>
+              {/* <Link> */}
+              {/* //when passing in an arguement we need to make the function a callback , passing the id of the post*/}
+              <FavoriteIcon onClick={() => favoritesPush(post._id)} >Favorite</FavoriteIcon>
+              {/* </Link> */}
             </Postcard>
           )
         })
         : filterPost.map(post => {
           return (<>
             <Postcard
+              key={post.id}
               post={post}>
               <CardActions>
                 <Button
@@ -90,7 +110,7 @@ export default function OutlinedCard() {
                   onClick={() => deletePost(post._id)}
                 >
                   Delete
-                    </Button>
+                </Button>
                 <Link to={{
                   pathname: `/update/${post._id}`,
                   //we are passing a state object to page we are taken to, the post we want to update
@@ -109,7 +129,13 @@ export default function OutlinedCard() {
               </CardActions>
             </Postcard>
 
-          </>)
+          </>) || filterFavs.map(post => {
+            return (<>
+              <Postcard
+                post={post}>
+              </Postcard>
+            </>)
+          })
         })}
     </div >)
 }

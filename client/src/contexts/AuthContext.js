@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react"
 import { auth0 } from "../firebase"
+import API from "../util/API"
 
 const AuthContext = React.createContext()
 
@@ -15,8 +16,12 @@ export function AuthProvider({ children }) {
     return auth0.createUserWithEmailAndPassword(email, password)
   }
 
-  function login(email, password) {
-    return auth0.signInWithEmailAndPassword(email, password)
+  async function login(email, password) {
+    const loginUser = await auth0.signInWithEmailAndPassword
+      (email, password)
+    const dbUser = await API.getUser(email)
+    setCurrentUser({ ...loginUser, ...dbUser.data })
+    return { ...loginUser, ...dbUser.data }
   }
 
   function logout() {

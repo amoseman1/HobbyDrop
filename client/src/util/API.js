@@ -15,6 +15,15 @@ export default {
     },
     deletePost: function (id) {
         return axios.delete("/api/posts/" + id);
+    },
+    favPush: function (postId, userId) {
+        return axios.put("/api/posts/favorites/" + postId, { userId })
+    },
+    createUser: function (email) {
+        return axios.post('/api/users', { email })
+    },
+    getUser: function (email) {
+        return axios.get('/api/users', { email })
     }
 
 }
